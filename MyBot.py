@@ -7,12 +7,16 @@ import yt_dlp
 import asyncio
 from collections import deque
 
+from KeepAlive import keep_alive
+
+
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 SONG_QUEUE = {}
 current_mujik = {}
 
+keep_alive()
 
 # {current_mujik.get(interaction.guild.id,"No Track Info")}
 
@@ -162,7 +166,7 @@ async def play_next_song(voice_client, guild_id, channel):
             "options": "-vn -c:a libopus -b:a 96k",
         }
 
-        source = discord.FFmpegOpusAudio(audio_url, **ffmpeg_options)
+        source = discord.FFmpegOpusAudio(audio_url, **ffmpeg_options,executable="Bin\\ffmpeg\\ffmpeg.exe")
 
         def after_play(error):
             if error:
