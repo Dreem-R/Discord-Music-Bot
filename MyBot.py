@@ -100,12 +100,12 @@ async def stop(interaction: discord.Interaction):
 
 @bot.tree.command(name="mujik", description="Music Bajane ke liye")
 @app_commands.describe(song_query="Search query")
-async def bujik(interaction: discord.Interaction, song_query: str):
+async def mujik(interaction: discord.Interaction, song_query: str):
+    await interaction.response.defer()
+
     if interaction.user.voice is None or interaction.user.voice.channel is None:
         await interaction.response.send_message("You need to be in a voice channel to use this command.")
         return
-
-    await interaction.response.defer()
 
     voice_channel = interaction.user.voice.channel
 
@@ -120,6 +120,7 @@ async def bujik(interaction: discord.Interaction, song_query: str):
         "noplaylist": True,
         "youtube_include_dash_manifest": False,
         "youtube_include_his_manifest": False,
+        'cookiefile': 'youtube.com_cookies.txt'
     }
 
     query = "ytsearch1:" + song_query
