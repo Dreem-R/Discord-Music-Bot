@@ -24,8 +24,7 @@ if encoded:
     with open("cookies.txt", "w", encoding="utf-8") as f:
         f.write(decoded)
 
-base_dir = os.path.dirname(os.path.abspath(__file__))
-ffmpeg_path = os.path.join(base_dir, "Bin", "ffmpeg", "ffmpeg")
+ffmpeg_path = './Bin/ffmpeg/ffmpeg'
 
 
 keep_alive()
