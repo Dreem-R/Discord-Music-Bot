@@ -12,12 +12,18 @@ from KeepAlive import keep_alive
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+COOKIES = os.getenv('YTDLP_COOKIES')
 
 SONG_QUEUE = {}
 current_mujik = {}
 
+if COOKIES:
+    with open("cookies.txt", "w") as f:
+        f.write(COOKIES)
+
 base_dir = os.path.dirname(os.path.abspath(__file__))
 ffmpeg_path = os.path.join(base_dir, "Bin", "ffmpeg", "ffmpeg")
+
 
 keep_alive()
 
