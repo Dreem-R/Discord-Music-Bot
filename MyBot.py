@@ -128,11 +128,11 @@ async def mujik(interaction: discord.Interaction, song_query: str):
         await voice_client.move_to(voice_channel)
 
     ydl_options = {
-        'format': 'bestaudio[abr<=96]/bestaudio',
-        "noplaylist": True,
-        "youtube_include_dash_manifest": False,
-        "youtube_include_his_manifest": False,
-        'cookiefile': 'cookies.txt'
+        'format': 'bestaudio/best',
+        'quiet': True,
+        'noplaylist': True,
+        'cookiefile': 'cookies.txt',
+        'youtube_include_dash_manifest': False,
     }
 
     query = "ytsearch1:" + song_query
@@ -145,7 +145,19 @@ async def mujik(interaction: discord.Interaction, song_query: str):
         return
 
     first_track = tracks[0]
-    audio_url = first_track.get("url")
+    formats = first_track.get("formats", [])
+    audio_url = None
+
+    # Find the best audio-only URL manually
+    for f in formats:
+        if f.get("acodec") != "none" and f.get("vcodec") == "none":
+            if "audio_url" not in locals():
+                audio_url = f["url"]
+
+    if not audio_url:
+        await interaction.followup.send("No audio stream found.")
+        return
+
     title = first_track.get("title", "Untitled")
 
     guild_id = str(interaction.guild.id)
