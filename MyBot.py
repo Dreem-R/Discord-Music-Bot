@@ -17,7 +17,7 @@ SONG_QUEUE = {}
 current_mujik = {}
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-ffmpeg_path = os.path.join(base_dir, "Bin", "ffmpeg", "ffmpeg.exe")
+ffmpeg_path = os.path.join(base_dir, "Bin", "ffmpeg", "ffmpeg")
 
 keep_alive()
 
