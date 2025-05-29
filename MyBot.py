@@ -16,6 +16,9 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 SONG_QUEUE = {}
 current_mujik = {}
 
+base_dir = os.path.dirname(os.path.abspath(__file__))
+ffmpeg_path = os.path.join(base_dir, "Bin", "ffmpeg", "ffmpeg.exe")
+
 keep_alive()
 
 # {current_mujik.get(interaction.guild.id,"No Track Info")}
@@ -167,7 +170,7 @@ async def play_next_song(voice_client, guild_id, channel):
             "options": "-vn -c:a libopus -b:a 96k",
         }
 
-        source = discord.FFmpegOpusAudio(audio_url, **ffmpeg_options,executable="Bin\\ffmpeg\\ffmpeg.exe")
+        source = discord.FFmpegOpusAudio(audio_url, **ffmpeg_options,executable=ffmpeg_path)
 
         def after_play(error):
             if error:
