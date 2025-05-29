@@ -128,37 +128,30 @@ async def mujik(interaction: discord.Interaction, song_query: str):
         await voice_client.move_to(voice_channel)
 
     ydl_options = {
-        'format': 'bestaudio/best',
-        'quiet': True,
+        'format': 'bestaudio[ext=webm][acodec=opus]/bestaudio/bestaudio[ext=m4a]',
         'noplaylist': True,
+        'quiet': True,
         'cookiefile': 'cookies.txt',
-        'youtube_include_dash_manifest': False,
+        'no_warnings': True,
+        'default_search': 'ytsearch',
+        'source_address': '0.0.0.0',  # Helps with IPv6 issues sometimes
     }
-
     query = "ytsearch1:" + song_query
 
     result = await search_ytdlp_async(query, ydl_options)
     tracks = result.get("entries", [])
 
-    if tracks is None:
-        await interaction.followup.send("No songs found")
+    if not tracks:
+        await interaction.followup.send("No songs found.")
         return
 
     first_track = tracks[0]
-    formats = first_track.get("formats", [])
-    audio_url = None
-
-    # Find the best audio-only URL manually
-    for f in formats:
-        if f.get("acodec") != "none" and f.get("vcodec") == "none":
-            if "audio_url" not in locals():
-                audio_url = f["url"]
+    audio_url = first_track.get("url")
+    title = first_track.get("title", "Untitled")
 
     if not audio_url:
         await interaction.followup.send("No audio stream found.")
         return
-
-    title = first_track.get("title", "Untitled")
 
     guild_id = str(interaction.guild.id)
     if SONG_QUEUE.get(guild_id) is None:
