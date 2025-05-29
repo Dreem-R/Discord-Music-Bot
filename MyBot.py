@@ -1,3 +1,5 @@
+import base64
+
 import discord
 import os
 from discord.ext import commands
@@ -12,14 +14,15 @@ from KeepAlive import keep_alive
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-COOKIES = os.getenv('YTDLP_COOKIES')
 
 SONG_QUEUE = {}
 current_mujik = {}
 
-if COOKIES:
-    with open("cookies.txt", "w") as f:
-        f.write(COOKIES)
+encoded = os.getenv("COOKIES_BASE64")
+if encoded:
+    decoded = base64.b64decode(encoded).decode()
+    with open("cookies.txt", "w", encoding="utf-8") as f:
+        f.write(decoded)
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 ffmpeg_path = os.path.join(base_dir, "Bin", "ffmpeg", "ffmpeg")
@@ -59,8 +62,9 @@ async def on_message(msg):
 
 @bot.tree.command(name="greet", description="Send greeting to another user")
 async def greet(interaction: discord.Interaction):
+    await interaction.response.defer()
     username = interaction.user.mention
-    await interaction.response.send_message(f"Hello there, {username}")
+    await interaction.followup.send(f"Hello there, {username}")
 
 
 @bot.tree.command(name='skip', description='Skip Current Mujik')
@@ -113,7 +117,7 @@ async def mujik(interaction: discord.Interaction, song_query: str):
     await interaction.response.defer()
 
     if interaction.user.voice is None or interaction.user.voice.channel is None:
-        await interaction.response.send_message("You need to be in a voice channel to use this command.")
+        await interaction.followup.send("You need to be in a voice channel to use this command.")
         return
 
     voice_channel = interaction.user.voice.channel
@@ -129,7 +133,7 @@ async def mujik(interaction: discord.Interaction, song_query: str):
         "noplaylist": True,
         "youtube_include_dash_manifest": False,
         "youtube_include_his_manifest": False,
-        'cookiefile': 'youtube.com_cookies.txt'
+        'cookiefile': 'cookies.txt'
     }
 
     query = "ytsearch1:" + song_query
