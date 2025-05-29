@@ -128,14 +128,15 @@ async def mujik(interaction: discord.Interaction, song_query: str):
         await voice_client.move_to(voice_channel)
 
     ydl_options = {
-        'format': 'bestaudio[ext=webm][acodec=opus]/bestaudio/bestaudio[ext=m4a]',
+        'format': 'bestaudio[acodec=opus][vcodec=none]/bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio',
         'noplaylist': True,
         'quiet': True,
         'cookiefile': 'cookies.txt',
         'no_warnings': True,
         'default_search': 'ytsearch',
-        'source_address': '0.0.0.0',  # Helps with IPv6 issues sometimes
+        'source_address': '0.0.0.0',
     }
+
     query = "ytsearch1:" + song_query
 
     result = await search_ytdlp_async(query, ydl_options)
@@ -184,8 +185,7 @@ async def play_next_song(voice_client, guild_id, channel):
             "options": "-vn"
         }
 
-        # Instead of FFmpegPCMAudio
-        source = discord.FFmpegOpusAudio(audio_url, **ffmpeg_options, executable=ffmpeg_path)
+        source = discord.FFmpegPCMAudio(audio_url, **ffmpeg_options, executable=ffmpeg_path)
 
         def after_play(error):
             if error:
