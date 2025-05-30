@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import yt_dlp
 import asyncio
 from collections import deque
+from discord import FFmpegPCMAudio
 
 from KeepAlive import keep_alive
 
@@ -127,15 +128,8 @@ async def mujik(interaction: discord.Interaction, song_query: str):
     elif voice_client != voice_channel:
         await voice_client.move_to(voice_channel)
 
-    ydl_options = {
-        'format': 'bestaudio[acodec=opus][vcodec=none]/bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio',
-        'noplaylist': True,
-        'quiet': True,
-        'cookiefile': 'cookies.txt',
-        'no_warnings': True,
-        'default_search': 'ytsearch',
-        'source_address': '0.0.0.0',
-    }
+    YDL_OPTIONS = {'format': 'bestaudio'}
+
 
     query = "ytsearch1:" + song_query
 
@@ -180,12 +174,11 @@ async def play_next_song(voice_client, guild_id, channel):
     if SONG_QUEUE[guild_id]:
         audio_url, title = SONG_QUEUE[guild_id].popleft()
 
-        ffmpeg_options = {
-            "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-            "options": "-vn"
+        FFMPEG_OPTIONS = {
+            'options': '-vn'
         }
 
-        source = discord.FFmpegPCMAudio(audio_url, **ffmpeg_options, executable=ffmpeg_path)
+        source = FFmpegPCMAudio(audio_url, **FFMPEG_OPTIONS,executable="./Bin/ffmpeg/ffmpeg")
 
         def after_play(error):
             if error:
