@@ -133,7 +133,7 @@ async def mujik(interaction: discord.Interaction, song_query: str):
 
     query = "ytsearch1:" + song_query
 
-    result = await search_ytdlp_async(query, ydl_options)
+    result = await search_ytdlp_async(query, YDL_OPTIONS)
     tracks = result.get("entries", [])
 
     if not tracks:
