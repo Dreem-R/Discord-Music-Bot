@@ -19,7 +19,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 SONG_QUEUE = {}
 current_mujik = {}
 
-ffmpeg_path = './Bin/ffmpeg/ffmpeg'
+ffmpeg_path = "./Bin/ffmpeg-7.0.2-amd64-static/ffmpeg"
 
 
 keep_alive()
@@ -180,7 +180,7 @@ async def play_next_song(voice_client, guild_id, channel):
             'options': '-vn -bufsize 64k'  # Increase buffer size for stability
         }
 
-        source = FFmpegPCMAudio(audio_url, **FFMPEG_OPTIONS)  # Remove executable argument
+        source = FFmpegPCMAudio(audio_url, **FFMPEG_OPTIONS, executable=ffmpeg_path)  # Remove executable argument
 
         def after_play(error):
             if error:
