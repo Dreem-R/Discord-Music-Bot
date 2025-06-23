@@ -19,12 +19,6 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 SONG_QUEUE = {}
 current_mujik = {}
 
-encoded = os.getenv("COOKIES_BASE64")
-if encoded:
-    decoded = base64.b64decode(encoded).decode()
-    with open("cookies.txt", "w", encoding="utf-8") as f:
-        f.write(decoded)
-
 ffmpeg_path = './Bin/ffmpeg/ffmpeg'
 
 
@@ -128,7 +122,14 @@ async def mujik(interaction: discord.Interaction, song_query: str):
     elif voice_client != voice_channel:
         await voice_client.move_to(voice_channel)
 
-    YDL_OPTIONS = {'format': 'bestaudio'}
+    YDL_OPTIONS = {
+        'format': 'bestaudio/best',  # Prioritize audio streams
+        'noplaylist': True,          # Avoid playlists unless specified
+        'quiet': False,               # Reduce log verbosity
+        'no_warnings': False,       # Suppress warnings
+        'default_search': 'ytsearch', # Enable YouTube search
+        'source_address': '0.0.0.0',
+    }
 
 
     query = "ytsearch1:" + song_query
@@ -175,10 +176,11 @@ async def play_next_song(voice_client, guild_id, channel):
         audio_url, title = SONG_QUEUE[guild_id].popleft()
 
         FFMPEG_OPTIONS = {
-            'options': '-vn'
+            'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 10',
+            'options': '-vn -bufsize 64k'  # Increase buffer size for stability
         }
 
-        source = FFmpegPCMAudio(audio_url, **FFMPEG_OPTIONS,executable="./Bin/ffmpeg/ffmpeg")
+        source = FFmpegPCMAudio(audio_url, **FFMPEG_OPTIONS)  # Remove executable argument
 
         def after_play(error):
             if error:
