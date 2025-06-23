@@ -129,6 +129,7 @@ async def mujik(interaction: discord.Interaction, song_query: str):
         'no_warnings': False,       # Suppress warnings
         'default_search': 'ytsearch', # Enable YouTube search
         'source_address': '0.0.0.0',
+        'cookiefile': 'cookies.txt',
     }
 
 
