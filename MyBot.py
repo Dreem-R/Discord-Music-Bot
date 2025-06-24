@@ -9,12 +9,15 @@ import yt_dlp
 import asyncio
 from collections import deque
 from discord import FFmpegPCMAudio
-
+import google.generativeai as genai
 from KeepAlive import keep_alive
 
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+
+Gemini_key = os.getenv('Gemini_Key')
+genai.configure(api_key=Gemini_key)
 
 SONG_QUEUE = {}
 current_mujik = {}
@@ -128,10 +131,7 @@ async def mujik(interaction: discord.Interaction, song_query: str):
         'quiet': False,               # Reduce log verbosity
         'no_warnings': False,       # Suppress warnings
         'default_search': 'ytsearch', # Enable YouTube search
-        'source_address': '0.0.0.0',
-        'cookiefile': 'cookies.txt',
     }
-
 
     query = "ytsearch1:" + song_query
 
@@ -196,5 +196,18 @@ async def play_next_song(voice_client, guild_id, channel):
         await voice_client.disconnect()
         SONG_QUEUE[guild_id] = deque()
 
+@bot.tree.command(name='search', description='Pucho jo Puchna hai')
+@app_commands.describe(query='Chatbot')
+async def search(interaction: discord.Interaction, query: str):
+    await interaction.response.defer()
+    model = genai.GenerativeModel('gemini-2.0-flash')
+    response = model.generate_content(f"{query}")
+    print(response.text)
+    if len(response.text) > 2000:
+        import io
+        file = discord.File(io.StringIO(response.text), filename="response.txt")
+        await interaction.followup.send("Response was too long. Here's the file:", file=file)
+    else:
+        await interaction.followup.send(response.text)
 
 bot.run(TOKEN)
