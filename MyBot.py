@@ -45,6 +45,61 @@ intent.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intent)
 
 
+class Playview(discord.ui.View):
+
+    @discord.ui.button(label="Pause",style=discord.ButtonStyle.secondary)
+    async def pause_button(self,interaction: discord.Interaction,button:discord.ui.button):
+        await main_pause(interaction=interaction)
+
+    @discord.ui.button(label="Resume",style=discord.ButtonStyle.blurple)
+    async def resume_button(self,interaction: discord.Interaction,button:discord.ui.button):
+        await main_resume(interaction=interaction)
+
+    @discord.ui.button(label="Skip",style=discord.ButtonStyle.primary)
+    async def skip_button(self,interaction: discord.Interaction,button:discord.ui.button):
+        await main_skip(interaction)
+
+    @discord.ui.button(label="Stop",style = discord.ButtonStyle.danger)
+    async def stop_button(self, interaction: discord.Interaction,buttons:discord.ui.button):
+        await main_stop(interaction)
+    
+
+async def main_pause(interaction: discord.Interaction):
+    if interaction.guild.voice_client and (interaction.guild.voice_client.is_playing()):
+        interaction.guild.voice_client.pause()
+        await interaction.response.send_message("you paused the music, why bro?", ephemeral=True)
+
+    elif interaction.guild.voice_client:
+        await interaction.response.send_message("Mujik is already paused", ephemeral=True)
+
+    else:
+        await interaction.response.send_message("No Mujik playing", ephemeral=True)
+
+async def main_skip(interaction: discord.Interaction):
+    if interaction.guild.voice_client and (
+            interaction.guild.voice_client.is_playing() or interaction.guild.voice_client.is_paused()):
+        interaction.guild.voice_client.stop()
+        await interaction.response.send_message("you skipped the music, why bro?", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"No Mujik playing", ephemeral=True)
+
+async def main_stop(interaction: discord.Interaction):
+    if interaction.guild.voice_client :
+        interaction.guild.voice_client.stop()
+        await interaction.response.send_message(f"Disconnecting from vc , sorry guys but {interaction.user.mention} ne chup bol diya")
+    else:
+        await interaction.response.send_message("No Mujik Playing")
+
+async def main_resume(interaction: discord.Interaction):
+    if interaction.guild.voice_client and (interaction.guild.voice_client.is_paused()):
+        interaction.guild.voice_client.resume()
+        await interaction.response.send_message("music is back on baby!!", ephemeral=True)
+    elif interaction.guild.voice_client:
+        await interaction.response.send_message("Mujik is already playing", ephemeral=True)
+
+    else:
+        await interaction.response.send_message("No Mujik in queue", ephemeral=True)
+
 @bot.event
 async def on_ready():
     await bot.tree.sync()
@@ -66,47 +121,22 @@ async def greet(interaction: discord.Interaction):
 
 @bot.tree.command(name='skip', description='Skip Current Mujik')
 async def skip(interaction: discord.Interaction):
-    if interaction.guild.voice_client and (
-            interaction.guild.voice_client.is_playing() or interaction.guild.voice_client.is_paused()):
-        interaction.guild.voice_client.stop()
-        await interaction.response.send_message(f"Skipping Mujik")
-    else:
-        await interaction.response.send_message(f"No Mujik playing")
-
+    await main_skip(interaction)
 
 @bot.tree.command(name='pause', description='Pause Current Mujik')
 async def pause(interaction: discord.Interaction):
-    if interaction.guild.voice_client and (interaction.guild.voice_client.is_playing()):
-        interaction.guild.voice_client.pause()
-        await interaction.response.send_message(f"Pausing Mujik")
-
-    elif interaction.guild.voice_client:
-        await interaction.response.send_message("Mujik is already paused")
-
-    else:
-        await interaction.response.send_message("No Mujik playing")
+    await main_pause(interaction)
 
 
 @bot.tree.command(name='resume', description='Resume Current Mujik')
 async def resume(interaction: discord.Interaction):
-    if interaction.guild.voice_client and (interaction.guild.voice_client.is_paused()):
-        interaction.guild.voice_client.resume()
-        await interaction.response.send_message(f"Playing Mujik")
+    await main_resume(interaction)
 
-    elif interaction.guild.voice_client:
-        await interaction.response.send_message("Mujik is already playing")
-
-    else:
-        await interaction.response.send_message("No Mujik in queue")
 
 
 @bot.tree.command(name='stop', description='Stop Current Mujik')
 async def stop(interaction: discord.Interaction):
-    if interaction.guild.voice_client :
-        interaction.guild.voice_client.stop()
-        await interaction.response.send_message(f"Disconnecting from vc , sorry guys but {interaction.user.mention} ne chup bol diya")
-    else:
-        await interaction.response.send_message("No Mujik Playing")
+    await main_stop(interaction)
 
 @bot.tree.command(name="mujik", description="Music Bajane ke liye")
 @app_commands.describe(song_query="Search query")
@@ -159,7 +189,8 @@ async def mujik(interaction: discord.Interaction, song_query: str):
     if voice_client.is_playing() or voice_client.is_paused():
         await interaction.followup.send(f"Added To Queue {title}")
     else:
-        await interaction.followup.send(f"Playing the Mujik --> {title}")
+        pview = Playview()
+        await interaction.followup.send(f"Playing the Mujik --> {title}", view = pview)
         await play_next_song(voice_client, guild_id, interaction.channel)
 
     #this is the music playing part
