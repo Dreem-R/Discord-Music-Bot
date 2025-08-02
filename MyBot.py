@@ -21,6 +21,7 @@ genai.configure(api_key=Gemini_key)
 
 SONG_QUEUE = {}
 current_mujik = {}
+now_playing_messages = {}
 
 ffmpeg_path = "./Bin/ffmpeg-7.0.2-amd64-static/ffmpeg"
 
@@ -190,7 +191,9 @@ async def mujik(interaction: discord.Interaction, song_query: str):
         await interaction.followup.send(f"Added To Queue {title}")
     else:
         pview = Playview()
-        await interaction.followup.send(f"Playing the Mujik --> {title}", view = pview)
+
+        message = await interaction.followup.send(f"Playing the Mujik --> {title}", view = pview)
+        now_playing_messages[guild_id] = message
         await play_next_song(voice_client, guild_id, interaction.channel)
 
     #this is the music playing part
@@ -221,7 +224,13 @@ async def play_next_song(voice_client, guild_id, channel):
 
         current_mujik[guild_id] = title
         voice_client.play(source, after=after_play)
-        await asyncio.create_task(channel.send(f"{title} is playing"))
+        message = now_playing_messages.get(guild_id)
+        if message:
+            await message.edit(content=f"🎶 Playing the Mujik --> **{title}**")
+        else:
+            # If no previous message found, just send a new one
+            message = await channel.send(f"🎶 Playing the Mujik --> **{title}**")
+            now_playing_messages[guild_id] = message
 
     else:
         await voice_client.disconnect()
