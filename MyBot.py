@@ -215,7 +215,7 @@ async def play_next_song(voice_client, guild_id, channel):
             'options': '-vn -bufsize 64k'  # Increase buffer size for stability
         }
 
-        source = FFmpegPCMAudio(audio_url, **FFMPEG_OPTIONS, executable=ffmpeg_path)  # Remove executable argument
+        source = FFmpegPCMAudio(audio_url, **FFMPEG_OPTIONS)  # Remove executable argument
 
         def after_play(error):
             if error:
@@ -235,6 +235,7 @@ async def play_next_song(voice_client, guild_id, channel):
     else:
         await voice_client.disconnect()
         SONG_QUEUE[guild_id] = deque()
+        now_playing_messages[guild_id] = deque()
 
 @bot.tree.command(name='search', description='Pucho jo Puchna hai')
 @app_commands.describe(query='Chatbot')
